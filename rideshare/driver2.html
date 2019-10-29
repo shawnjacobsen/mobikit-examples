@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.css" integrity="sha256-ujE/ZUB6CMZmyJSgQjXGCF4sRRneOimQplBVLu8OU5w=" crossorigin="anonymous" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+        <script src="https://realtime-demo.mobikit.io/mobikit.js"></script>
+
+        <script>
+            var driver_id = Math.floor(Math.random() * 1000)+10000;
+            $(document).ready(function () {
+                $('#ride_status').hide();
+                const mk = new mobikit.MobikitStream('<MOBIKIT TOKEN>', <FEED_ID>);
+                mk.tags = {
+                    driver_id: driver_id
+                };
+                $('#driver_id_label').html(`Hello driver ${driver_id}!`);
+                mk.on_connect = function() {
+                    $('#conn_notification').html('Connected').removeClass('is-danger').addClass('is-success');
+                };
+                mk.on_disconnect = function() {
+                    $('#conn_notification').html('Differently Connected').removeClass('is-success').addClass('is-danger');
+                };
+
+                (function attemptGetRide() {
+                    $.ajax({
+                    url: `/driver/${driver_id}/accept_ride`,
+                    success: (poll_response) => {
+                        if(poll_response.ride !== null) {
+                            $('#searching_bar').hide();
+                            $('#ride_status').show();
+                            pollStatus();
+                        } else {
+                            attemptGetRide();
+                        }
+                    },
+                    error: (error) => {
+                        attemptGetRide();
+                    }
+                })
+                })();
+
+                mk.startCollecting();
+            });
+            
+            function pollStatus() {
+                $.ajax({
+                    url: `/driver/${driver_id}/status`,
+                    success: (poll_response) => {
+                        if(poll_response.ride.accepted) {
+                            let coords = poll_response.ride.rider_start_location;
+                            $('#ride_status_body').html(`<p>Get to (${coords[0]}, ${coords[1]})</p>`);
+                        }
+                    },
+                    complete: () => setTimeout(pollStatus, 2000)
+                });
+            }
+        </script>
+
+    </head>
+    <body>
+        <section class="section">
+            <div id="conn_notification" class="notification">Connecting...</div>
+            <div class="container">
+                <h1 id="driver_id_label" class="title"></h1>
+                <br /><br />
+                <div id="searching_bar">
+                    <h2 class="subtitle">Searching...</h2>
+                    <progress class="progress is-large is-info" max="100">100%</progress>
+                </div>
+            </div>
+
+            <div class="container">
+                <article id="ride_status" class="message is-dark">
+                    <div class="message-header">
+                        <p>Ride Found</p>
+                    </div>
+                    <div id="ride_status_body" class="message-body"></div>
+                </article>
+            </div>
+        </section>
+    </body>
+</html>
