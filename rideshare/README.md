@@ -1,27 +1,56 @@
-# Mobikit Rideshare Demo
+# Ridesharing Example
 
-### Setup
+This folder contains an end-to-end example ridesharing application built using Mobikit.
 
-This project depends on python3 with the `mobikit`, `flask`, and `flask_cors` packages.
+## Requirements
 
-In the Mobikit platform create a new workspace with `riders` and `drivers` as realtime feeds.
+- Python 3.6+
 
-#### Environment Variables
+## Quick Start
 
-Set the `MOBIKIT_API_TOKEN` variable with your API token.
+Start by cloning this repo and navigating into this example's directory:
 
-#### Constants
+```bash
+git clone https://github.com/mobikitinc/mobikit-examples.git
+cd mobikit-examples/rideshare
+```
 
-`driver.html` and `rider.html` both have `<SETME_TOKEN>` and `<SETME_FEED_ID>`s which need to be replaced.
+To setup the application, you'll need to create 2 realtime feeds within Mobikit, one for drivers and one for riders. Then, fill in the variables in the following files:
 
-`rideshare.py` needs `<SETME_WORKSPACE_ID>` set to the project workspace ID.
+- **templates/driver.html** set `DRIVER_FEED_ID` to the Mobikit realtime driver feed, and `DRIVER_API_TOKEN` to the driver's Mobikit API token
 
-#### Hosting
+- **templates/rider.html** set `RIDER_FEED_ID` to the Mobikit realtime rider feed, and `RIDER_API_TOKEN` to the riders's Mobikit API token
 
-Clone this project and run with `./rideshare.py`.
+Next, create a Python virtual environment using the Python interpreter you want to use (i.e. `python3` is Python 3.6 on my machine):
 
-The web security model requires a secure context to provide [Geolocation](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API), so any site must be hosted with https.
-In general, if the device doesn't prompt you for location access the first time you open the site, it isn't working.
+```bash
+python3 -m venv my_venv
+```
 
-You can use [ngrok](https://ngrok.com/) with `ngrok http 8000` to foreword your local application to the web.
+Activate the virtual environment and install required packages:
 
+```bash
+source my_venv/bin/activate
+python3 setup.py install
+```
+
+Set environment variables for the Mobikit Stream API URL and your Mobikit API token. You can get your Mobikit API token by navigating to Mobikit and copying it from your user settings page. Here is an example of how to set environment variables in `bash`:
+
+```bash
+export MOBIKIT_API_TOKEN='<my_api_token>'
+export MOBIKIT_WORKSPACE_ID='<my_workspace_id>'
+```
+
+Now you can run the application:
+
+```bash
+start-rideshare
+```
+
+The web security model requires a secure context to provide [Geolocation](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API), so any site must be hosted with https. In general, if the device doesn't prompt you for location access the first time you open the site, it isn't working.
+
+You can use [ngrok](https://ngrok.com/) to forward your local application to the web:
+
+```bash
+ngrok http 8000
+```

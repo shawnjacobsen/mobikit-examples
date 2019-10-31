@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.css"
+      integrity="sha256-ujE/ZUB6CMZmyJSgQjXGCF4sRRneOimQplBVLu8OU5w="
+      crossorigin="anonymous"
+    />
+
+    <!-- Scripts, including the Mobikit JS Client -->
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+      integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mobikit/core@0.2.1/dist/mobikit.min.js"></script>
+  </head>
+  <body>
+    <section class="section">
+      <div id="conn_notification" class="notification">Connecting...</div>
+      <div class="container">
+        <h1 id="driverId_label" class="title"></h1>
+        <br /><br />
+        <div id="searching_bar">
+          <h2 class="subtitle">Searching...</h2>
+          <progress class="progress is-large is-info" max="100">100%</progress>
+        </div>
+      </div>
+
+      <div class="container">
+        <article id="ride_status" class="message is-dark">
+          <div class="message-header">
+            <p>Ride Found</p>
+          </div>
+          <div id="ride_status_body" class="message-body"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Main script -->
+    <script>
+      // NOTE: this script uses some features that are only available in modern browsers (Chrome, Firefox, Edge, etc.)
+      (async function() {
+        // TODO: set these values!
+        const DRIVER_FEED_ID = "<DRIVER_FEED_ID>";
+        const DRIVER_API_TOKEN = "<DRIVER_USER_API_TOKEN>";
+        const driverId = Math.floor(Math.random() * 1000) + 10000;
+
+        // Initialize the Mobikit API client
+        const mobikitAPI = new mobikit.MobikitAPI({ env: "hackathon" });
+        await mobikitAPI.initialize({ token: DRIVER_API_TOKEN });
+
+        // Initialize the Mobikit Stream client
+        const stream = new mobikit.MobikitStream(
+          mobikitAPI.auth,
+          DRIVER_FEED_ID
+        );
+        stream.tags = {
+          driver_id: driverId
+        };
+        stream.on_connect = function() {
+          $("#conn_notification")
+            .html("Connected")
+            .removeClass("is-danger")
+            .addClass("is-success");
+        };
+        stream.on_disconnect = function() {
+          $("#conn_notification")
+            .html("Differently Connected")
+            .removeClass("is-success")
+            .addClass("is-danger");
+        };
+
+        // Do some UI setup
+        $("#ride_status").hide();
+        $("#driverId_label").html(`Hello driver ${driverId}!`);
+
+        // poll the drivers status
+        function pollStatus() {
+          $.ajax({
+            url: `/driver/${driverId}/status`,
+            success: poll_response => {
+              if (poll_response.ride.accepted) {
+                let coords = poll_response.ride.rider_start_location;
+                $("#ride_status_body").html(
+                  `<p>Get to (${coords[0]}, ${coords[1]})</p>`
+                );
+              }
+            },
+            complete: () => setTimeout(pollStatus, 2000)
+          });
+        }
+
+        // attempt to get a ride for the driver
+        (function attemptGetRide() {
+          $.ajax({
+            url: `/driver/${driverId}/accept_ride`,
+            success: poll_response => {
+              if (poll_response.ride !== null) {
+                $("#searching_bar").hide();
+                $("#ride_status").show();
+                pollStatus();
+              } else {
+                attemptGetRide();
+              }
+            },
+            error: error => {
+              attemptGetRide();
+            }
+          });
+        })();
+
+        // start collection data
+        stream.startCollecting();
+      })();
+    </script>
+  </body>
+</html>

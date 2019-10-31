@@ -1,21 +1,20 @@
-# Python Stream Data
+# CABS Bus Alert
 
-This folder contains example Python scripts for sending data to the Stream API. The following scripts are included:
+This folder contains a Python script ingesting data from an external source in Mobikit via the Mobikit Stream API. The following script is included:
 
-- `send-one.py`: script to send one data point
-- `send-random.py`: script to send random data points
+- `stream-cabs-data.py`: script to stream CABS bus data into Mobikit
 
 ## Requirements
 
 - Python 3.6+
 
-## Quick Start
+## Ingestion Quick Start
 
 Start by cloning this repo and navigating into this example's directory:
 
 ```bash
 git clone https://github.com/mobikitinc/mobikit-examples.git
-cd mobikit-examples/python-stream-data
+cd mobikit-examples/bus-alert
 ```
 
 Create a Python virtual environment using the Python interpreter you want to
@@ -39,11 +38,23 @@ export MOBIKIT_STREAM_API_URL='https://stream.ohio.mobikit.io/'
 export MOBIKIT_API_TOKEN='FILL_ME_IN'
 ```
 
-Now you can run the scripts:
+Now you can run the script:
 
 ```bash
 # Note that `feed-id` should be a Mobikit Realtime Feed ID
-./send-one.py --feed-id 86 -x '-83.039358' -y '39.998030' --tags '{"vehicle_id": 10}'
+./stream-cabs-data.py --feed-id 86
 ```
 
-The scripts have a `--help` flag that will print out some usage information and describe the flags used above.
+The scripts has a `--help` flag that will print out some usage information and describe the flag used above.
+
+## Creating an Automation
+
+Once a data feed has been created and data is being streamed to it you can use Mobikit to build automatons on top of it. An automation consists of one or more triggers and one or more events.
+
+Here we will be building an example automation that sends a text message when a bus enters a parking lot:
+
+![Automation Example Screenshot](./images/automations.png)
+
+And, once a bus enters the lot:
+
+![Text Message Screenshot](./images/texts.jpg)
