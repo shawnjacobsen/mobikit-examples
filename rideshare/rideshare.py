@@ -9,12 +9,12 @@ import json
 import mobikit
 
 MOBIKIT_API_TOKEN = os.getenv('MOBIKIT_API_TOKEN')
-mobikit.set_api_key(MOBIKIT_API_TOKEN)
+mobikit.set_api_key(MOBIKIT_API_TOKEN, environment='ohio')
 
 app = Flask(__name__, static_folder=os.path.abspath(os.getcwd()))
 CORS(app)
 
-WORKSPACE_ID = 185
+WORKSPACE_ID = <SETME_WORKSPACE_ID>
 
 ride_requests = {}
 

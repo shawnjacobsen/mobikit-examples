@@ -7,59 +7,7 @@
 
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
-        <script src="https://realtime-demo.mobikit.io/mobikit.js"></script>
-
-        <script>
-            var driver_id = Math.floor(Math.random() * 1000)+10000;
-            $(document).ready(function () {
-                $('#ride_status').hide();
-                const mk = new mobikit.MobikitStream('<MOBIKIT TOKEN>', <FEED_ID>);
-                mk.tags = {
-                    driver_id: driver_id
-                };
-                $('#driver_id_label').html(`Hello driver ${driver_id}!`);
-                mk.on_connect = function() {
-                    $('#conn_notification').html('Connected').removeClass('is-danger').addClass('is-success');
-                };
-                mk.on_disconnect = function() {
-                    $('#conn_notification').html('Differently Connected').removeClass('is-success').addClass('is-danger');
-                };
-
-                (function attemptGetRide() {
-                    $.ajax({
-                    url: `/driver/${driver_id}/accept_ride`,
-                    success: (poll_response) => {
-                        if(poll_response.ride !== null) {
-                            $('#searching_bar').hide();
-                            $('#ride_status').show();
-                            pollStatus();
-                        } else {
-                            attemptGetRide();
-                        }
-                    },
-                    error: (error) => {
-                        attemptGetRide();
-                    }
-                })
-                })();
-
-                mk.startCollecting();
-            });
-            
-            function pollStatus() {
-                $.ajax({
-                    url: `/driver/${driver_id}/status`,
-                    success: (poll_response) => {
-                        if(poll_response.ride.accepted) {
-                            let coords = poll_response.ride.rider_start_location;
-                            $('#ride_status_body').html(`<p>Get to (${coords[0]}, ${coords[1]})</p>`);
-                        }
-                    },
-                    complete: () => setTimeout(pollStatus, 2000)
-                });
-            }
-        </script>
-
+        <script src="https://cdn.jsdelivr.net/npm/@mobikit/core@latest/dist/mobikit.min.js"></script>
     </head>
     <body>
         <section class="section">
@@ -82,5 +30,58 @@
                 </article>
             </div>
         </section>
+        <script>
+            var driver_id = Math.floor(Math.random() * 1000)+10000;
+            (async function () {
+                $('#ride_status').hide();
+                const mk = new mobikit.MobikitAPI({env: 'hackathon'});
+                await mk.initialize({token: '<SETME_TOKEN>'});
+
+                const stream = new mobikit.MobikitStream(mk.auth, <SETME_DRIVER_FEED_ID>);
+                stream.tags = {
+                    driver_id: driver_id
+                };
+                $('#driver_id_label').html(`Hello driver ${driver_id}!`);
+                stream.on_connect = function() {
+                    $('#conn_notification').html('Connected').removeClass('is-danger').addClass('is-success');
+                };
+                stream.on_disconnect = function() {
+                    $('#conn_notification').html('Differently Connected').removeClass('is-success').addClass('is-danger');
+                };
+
+                (function attemptGetRide() {
+                    $.ajax({
+                    url: `/driver/${driver_id}/accept_ride`,
+                    success: (poll_response) => {
+                        if(poll_response.ride !== null) {
+                            $('#searching_bar').hide();
+                            $('#ride_status').show();
+                            pollStatus();
+                        } else {
+                            attemptGetRide();
+                        }
+                    },
+                    error: (error) => {
+                        attemptGetRide();
+                    }
+                })
+                })();
+
+                stream.startCollecting();
+            })();
+            
+            function pollStatus() {
+                $.ajax({
+                    url: `/driver/${driver_id}/status`,
+                    success: (poll_response) => {
+                        if(poll_response.ride.accepted) {
+                            let coords = poll_response.ride.rider_start_location;
+                            $('#ride_status_body').html(`<p>Get to (${coords[0]}, ${coords[1]})</p>`);
+                        }
+                    },
+                    complete: () => setTimeout(pollStatus, 2000)
+                });
+            }
+        </script>
     </body>
 </html>

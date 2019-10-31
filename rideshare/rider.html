@@ -7,52 +7,7 @@
         
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
-        <script src="https://realtime-demo.mobikit.io/mobikit.js"></script>
-        
-        <script>     
-            var rider_id = Math.floor(Math.random() * 100);
-            $(document).ready(function () {
-                $('#ride_status').hide();
-                const mk = new mobikit.MobikitStream('<MOBIKIT TOKEN>', <FEED_ID>);
-                mk.tags = {
-                    rider_id: rider_id
-                };
-                $('#rider_id_label').html(`Hello rider ${rider_id}!`);
-                $('#req_ride_btn').click(function() {
-                    $('#req_ride_btn').addClass('is-loading');
-                    $.ajax({
-                        url: `/rider/${rider_id}/request_ride`,
-                        success: function() {
-                            $('#req_ride_btn').hide();
-                            $('#ride_status').show();
-                            pollStatus();
-                        }
-                    });
-                });
-                mk.on_connect = function() {
-                    $('#conn_notification').html('Connected').removeClass('is-danger').addClass('is-success');
-                };
-                mk.on_disconnect = function() {
-                    $('#conn_notification').html('Differently Connected').removeClass('is-success').addClass('is-danger');
-                };
-                
-                mk.startCollecting();
-            });
-            
-            function pollStatus() {
-                $.ajax({
-                    url: `/rider/${rider_id}/status`,
-                    success: (poll_response) => {
-                        if(poll_response.ride.accepted) {
-                            $('#ride_status').removeClass('is-dark').addClass('is-primary');
-                            $('#ride_status_header').html(`<p>Ride Accepted (${poll_response.ride.ride_id})</p>`);
-                        }
-                    },
-                    complete: () => setTimeout(pollStatus, 2000)
-                })
-            }
-            </script>
-
+        <script src="https://cdn.jsdelivr.net/npm/@mobikit/core@latest/dist/mobikit.min.js"></script>
     </head>
     <body>
         <section class="section">
@@ -71,5 +26,51 @@
                   </article>
             </div>
         </section>
+        <script>
+            var rider_id = Math.floor(Math.random() * 100);
+            (async function() {
+                $('#ride_status').hide();
+                const mk = new mobikit.MobikitAPI({env: 'hackathon'});
+                await mk.initialize({token: '<SETME_TOKEN>'});
+
+                const stream = new mobikit.MobikitStream(mk.auth, <SETME_RIDER_FEED_ID>);
+                stream.tags = {
+                    rider_id: rider_id
+                };
+                $('#rider_id_label').html(`Hello rider ${rider_id}!`);
+                $('#req_ride_btn').click(function() {
+                    $('#req_ride_btn').addClass('is-loading');
+                    $.ajax({
+                        url: `/rider/${rider_id}/request_ride`,
+                        success: function() {
+                            $('#req_ride_btn').hide();
+                            $('#ride_status').show();
+                            pollStatus();
+                        }
+                    });
+                });
+                stream.on_connect = function() {
+                    $('#conn_notification').html('Connected').removeClass('is-danger').addClass('is-success');
+                };
+                stream.on_disconnect = function() {
+                    $('#conn_notification').html('Differently Connected').removeClass('is-success').addClass('is-danger');
+                };
+                
+                stream.startCollecting();
+            })();
+        
+            function pollStatus() {
+                $.ajax({
+                    url: `/rider/${rider_id}/status`,
+                    success: (poll_response) => {
+                        if(poll_response.ride.accepted) {
+                            $('#ride_status').removeClass('is-dark').addClass('is-primary');
+                            $('#ride_status_header').html(`<p>Ride Accepted (${poll_response.ride.ride_id})</p>`);
+                        }
+                    },
+                    complete: () => setTimeout(pollStatus, 2000)
+                })
+            }
+        </script>
     </body>
 </html>
