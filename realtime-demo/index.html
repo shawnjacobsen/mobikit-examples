@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mobikit Mobile</title>
+        <meta charset="utf-8"/>
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@mobikit/core@0.2.1/dist/mobikit.min.js"></script>
+
+        <style>
+            html *
+            {
+                font-size: 3vh;
+                font-family: 'Source Sans Pro', sans-serif;
+                font-weight: 900;
+            }
+            .centered {
+                position: fixed;
+                top: 20%;
+                left: 50%;
+                transform: translate(-50%, -20%);
+            }
+            .btn {
+                background-color: #008CBA;
+                color: #f5f7fb;
+                padding: 15px 32px;
+                text-align: center;
+                display: inline-block;
+                margin-top: 20px;
+            }
+        </style>
+
+        <script>
+            var auth = {};
+
+            $(document).ready(function () {
+                $('#screen_live').hide();
+                $('#login_failed').hide();
+                $('#feed_failed').hide();
+
+                $('#container').css({backgroundColor: '#f5f7fb'});
+                $('#form1').submit(async function(e) {
+                    e.preventDefault();
+                    let arr = $('form#form1').serializeArray()
+
+                    const mk = new mobikit.MobikitAPI({env: 'hackathon'});
+
+                    try {
+                        await mk.initialize({email: arr[0].value, password: arr[1].value});
+                        $('#login_failed').hide();
+                    } catch(err) {
+                        $('#login_failed').show();
+                        console.log(err);
+                        return;
+                    }
+                    
+                    let workspace_id = parseInt(arr[2].value);
+                    let feed_id = parseInt(arr[3].value);
+
+                    /* just to verify the feed exists */
+                    try {
+                        let result = await mk.workspaces.queryFeed(workspace_id, feed_id, {"select":[{"field":"id"}],"limit":1});
+                        if(resut === undefined) {
+                            throw Error('Feed query error');
+                        }
+                        $('#feed_failed').hide();
+                    } catch(err) {
+                        console.log(err);
+                        $('#feed_failed').show();
+                        return;
+                    }
+
+                    const stream = new mobikit.MobikitStream(mk.auth, feed_id);
+                    stream.tags = {
+                        source: 'mobile'
+                    };
+                    stream.on_connect = function() {
+                        $('#statusText').html('Connected');
+                        $('#container').css({backgroundColor: '#9ef7b4'});
+                    };
+                    stream.on_disconnect = function() {
+                        $('#statusText').html('Differently Connected');
+                        $('#container').css({backgroundColor: '#f29a68'});
+                    };
+                    
+                    stream.startCollecting();
+
+                    $('#screen_login').hide();
+                    $('#screen_live').show();
+                });
+            });
+        </script>
+    </head>
+    <body id="container">
+        <div class="centered" id="screen_login">
+            <p id='login_failed' style='color: red;'>Login Failed</p>
+            <p id='feed_failed' style='color: red;'>Bad Workspace or Feed</p>
+            <form id="form1" action="">
+                Email: <input type="email" name="email">
+                <br />
+                Password: <input type="password" name="password">
+                <br />
+                Workspace Id: <input type="number" name="workspace_id">
+                <br />
+                Feed Id: <input type="number" name="feed_id">
+                <br />
+                <input class="btn" type="submit" value="Submit">
+            </form> 
+        </div>
+        <div id="screen_live">
+            <p id="statusText" class="centered" style="font-family: 'Source Sans Pro', sans-serif; font-size: 10vw; font-weight: 900;"></p>
+        </div>
+    </body>
+</html>
