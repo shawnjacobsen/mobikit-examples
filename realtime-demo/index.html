@@ -61,7 +61,7 @@
                     /* just to verify the feed exists */
                     try {
                         let result = await mk.workspaces.queryFeed(workspace_id, feed_id, {"select":[{"field":"id"}],"limit":1});
-                        if(resut === undefined) {
+                        if(typeof result === "undefined") {
                             throw Error('Feed query error');
                         }
                         $('#feed_failed').hide();
