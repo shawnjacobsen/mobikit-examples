@@ -28,11 +28,11 @@ def route_index():
 
 @app.route("/driver")
 def driver():
-    return app.send_static_file('driver2.html')
+    return app.send_static_file('driver.html')
 
 @app.route("/rider")
 def rider():
-    return app.send_static_file('rider2.html')
+    return app.send_static_file('rider.html')
 
 def window_start_timestamp():
     ts = (datetime.datetime.utcnow() - datetime.timedelta(seconds=15)).isoformat() + 'Z'
