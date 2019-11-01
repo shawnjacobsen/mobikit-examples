@@ -46,12 +46,12 @@
       (async function() {
         // TODO: set these values!
         const RIDER_FEED_ID = "<RIDER_FEED_ID>";
-        const RIDER_API_TOKEN = "<RIDER_USER_API_TOKEN>";
+        const MOBIKIT_API_TOKEN = "<MOBIKIT_API_TOKEN>";
         const riderId = Math.floor(Math.random() * 100);
 
         // Initialize the Mobikit API client
         const mobikitAPI = new mobikit.MobikitAPI({ env: "hackathon" });
-        await mobikitAPI.initialize({ token: RIDER_API_TOKEN });
+        await mobikitAPI.initialize({ token: MOBIKIT_API_TOKEN });
         $("#ride_status").hide();
 
         // Initialize the Mobikit Stream client
