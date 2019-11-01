@@ -12,11 +12,8 @@ import socketio
 # parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--feed-id", "-f", type=int, help="unique feed id", required=True)
-
 parser.add_argument("--latitude", "-y", type=float, help="latitude", required=True)
-
 parser.add_argument("--longitude", "-x", type=float, help="longitude", required=True)
-
 parser.add_argument(
     "--timestamp",
     "-t",

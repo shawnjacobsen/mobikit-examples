@@ -12,9 +12,7 @@ import socketio
 # parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--feed-id", "-f", type=int, help="unique feed id", required=True)
-
 parser.add_argument("--count", type=int, help="number of points to send", required=True)
-
 parser.add_argument("--tags", "-d", type=str, default="{}", help="JSON object")
 
 args = parser.parse_args()
