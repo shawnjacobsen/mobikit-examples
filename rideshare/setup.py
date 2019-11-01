@@ -7,7 +7,7 @@ setup(
     description="Mobikit Rideshare Example",
     url="https://github.com/mobikitinc/mobikit-examples/tree/master/rideshare",
     packages=find_packages(),
-    package_data={"rideshare": ["templates/**/*"]},
+    package_data={"rideshare": ["templates/*"]},
     install_requires=["mobikit~=0.6.0", "Flask~=1.1.1", "Flask-Cors~=3.0.8"],
     entry_points={"console_scripts": ["start-rideshare=rideshare.app:main"]},
 )

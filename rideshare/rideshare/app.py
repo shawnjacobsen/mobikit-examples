@@ -11,6 +11,7 @@ import mobikit
 
 from rideshare import utils
 
+print("PATH:", Path(__file__).parent.joinpath("templates"))
 
 # Setup the Mobikit API client
 MOBIKIT_API_TOKEN = os.getenv("MOBIKIT_API_TOKEN")
@@ -111,7 +112,10 @@ def driver_get_request(driver_id):
 
     # Get the driver positions
     coords = utils.get_most_recent(
-        "drivers", lambda row: "driver_id" in row and row["driver_id"] == driver_id
+        mobikit,
+        MOBIKIT_WORKSPACE_ID,
+        "drivers",
+        lambda row: "driver_id" in row and row["driver_id"] == driver_id
     )
     if coords is None:
         return {"ride": None}

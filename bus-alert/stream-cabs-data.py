@@ -82,7 +82,7 @@ if __name__ == "__main__":
             point = geojson.Point((bus["lon"], bus["lat"]))
             tags = {
                 "hdg": bus["hdg"],
-                "vid": bus["vid"],
+                "vehicle_id": bus["vid"],
                 "route": route,
                 "timestamp": timestamp,
             }
