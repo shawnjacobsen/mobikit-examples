@@ -17,9 +17,17 @@ cd mobikit-examples/rideshare
 
 To setup the application, you'll need to create 2 realtime feeds within Mobikit, one for drivers and one for riders. Then, fill in the variables in the following files:
 
-- **templates/driver.html** set `DRIVER_FEED_ID` to the Mobikit realtime driver feed, and `DRIVER_API_TOKEN` to the driver's Mobikit API token
+- **templates/driver.html**
 
-- **templates/rider.html** set `RIDER_FEED_ID` to the Mobikit realtime rider feed, and `RIDER_API_TOKEN` to the riders's Mobikit API token
+  - set `DRIVER_FEED_ID` to the Mobikit realtime driver feed
+
+  - set `MOBIKIT_API_TOKEN` to a Mobikit API token
+
+- **templates/rider.html**
+
+  - set `RIDER_FEED_ID` to the Mobikit realtime rider feed
+
+  - set `MOBIKIT_API_TOKEN` to a Mobikit API token
 
 Next, create a Python virtual environment using the Python interpreter you want to use (i.e. `python3` is Python 3.6 on my machine):
 

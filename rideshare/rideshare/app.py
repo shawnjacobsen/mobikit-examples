@@ -152,5 +152,8 @@ def driver_get_request(driver_id):
 
 
 # Run the flask app
-if __name__ == "__main__":
+def main():
+    """
+    Run the flask server.
+    """
     app.run(port=8000)

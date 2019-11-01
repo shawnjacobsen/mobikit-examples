@@ -50,12 +50,12 @@
       (async function() {
         // TODO: set these values!
         const DRIVER_FEED_ID = "<DRIVER_FEED_ID>";
-        const DRIVER_API_TOKEN = "<DRIVER_USER_API_TOKEN>";
+        const MOBIKIT_API_TOKEN = "<MOBIKIT_API_TOKEN>";
         const driverId = Math.floor(Math.random() * 1000) + 10000;
 
         // Initialize the Mobikit API client
         const mobikitAPI = new mobikit.MobikitAPI({ env: "hackathon" });
-        await mobikitAPI.initialize({ token: DRIVER_API_TOKEN });
+        await mobikitAPI.initialize({ token: MOBIKIT_API_TOKEN });
 
         // Initialize the Mobikit Stream client
         const stream = new mobikit.MobikitStream(
