@@ -11,35 +11,21 @@ import socketio
 
 # parse command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--feed-id", "-f",
-    type=int,
-    help="unique feed id",
-    required=True)
+parser.add_argument("--feed-id", "-f", type=int, help="unique feed id", required=True)
+
+parser.add_argument("--latitude", "-y", type=float, help="latitude", required=True)
+
+parser.add_argument("--longitude", "-x", type=float, help="longitude", required=True)
 
 parser.add_argument(
-    "--latitude", "-x",
-    type=float,
-    help="latitude",
-    required=True)
-
-parser.add_argument(
-    "--longitude", "-y",
-    type=float,
-    help="longitude",
-    required=True)
-
-parser.add_argument(
-    "--timestamp", "-t",
+    "--timestamp",
+    "-t",
     type=str,
     default=datetime.now().isoformat(),
-    help="timestamp in ISO8601 format")
+    help="timestamp in ISO8601 format",
+)
 
-parser.add_argument(
-    "--tags", "-d",
-    type=str,
-    default="{}",
-    help="JSON object")
+parser.add_argument("--tags", "-d", type=str, default="{}", help="JSON object")
 
 args = parser.parse_args()
 sio = socketio.Client()
@@ -55,23 +41,18 @@ except ValueError as e:
 # connect to the server
 sio.connect(
     os.getenv("MOBIKIT_STREAM_API_URL"),
-    headers={
-        "Authorization": "Token {}".format(os.getenv("MOBIKIT_API_TOKEN"))
-    },
+    headers={"Authorization": "Token {}".format(os.getenv("MOBIKIT_API_TOKEN"))},
 )
 
 # assemble the GeoJSON feature
 feature = geojson.Feature(
-    geometry=geojson.Point((args.latitude, args.longitude)),
-    properties=json.loads(args.tags)
+    geometry=geojson.Point((args.longitude, args.latitude)),
+    properties=json.loads(args.tags),
 )
 
 # assemble the SocketIO event
 event = {
-    "headers": {
-        "feed_id": args.feed_id,
-        "timestamp": timestamp.isoformat()
-    },
+    "headers": {"feed_id": args.feed_id, "timestamp": timestamp.isoformat()},
     "feature": feature,
 }
 
