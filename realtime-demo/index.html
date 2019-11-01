@@ -129,6 +129,11 @@
         $("#feedFailed").hide();
         $("#container").css({ backgroundColor: "#f5f7fb" });
 
+        // Check for a hosting security issue
+        if(!window.isSecureContext) {
+            alert("This is not a secure context. Geolocation will not work!");
+        }
+
         // initialize mobikit API client
         const mobikitAPI = new mobikit.MobikitAPI({ env: "hackathon" });
 
