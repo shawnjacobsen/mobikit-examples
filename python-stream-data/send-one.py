@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import os
-import json
 import sys
+import json
+import time
 import argparse
 from datetime import datetime
 
@@ -23,9 +24,9 @@ parser.add_argument(
 )
 
 parser.add_argument("--tags", "-d", type=str, default="{}", help="JSON object")
+parser.add_argument("--debug", action="store_true", help="debug logging")
 
 args = parser.parse_args()
-sio = socketio.Client()
 
 # parse the timestamp as ISO8601 (Python compatible)
 try:
@@ -36,10 +37,13 @@ except ValueError as e:
     sys.exit(1)
 
 # connect to the server
+sio = socketio.Client(logger=args.debug)
 sio.connect(
     os.getenv("MOBIKIT_STREAM_API_URL"),
     headers={"Authorization": "Token {}".format(os.getenv("MOBIKIT_API_TOKEN"))},
 )
+
+print("SID: {}".format(sio.sid))
 
 # assemble the GeoJSON feature
 feature = geojson.Feature(
@@ -56,8 +60,15 @@ event = {
 # emit the event on the "data" channel and call print() with the response
 sio.emit("data", event, callback=print)
 
-# wait for SocketIO to finish processing messages and callbacks
-sio.sleep(1.0)
+# wait for SocketIO to have a chance to send the event and process the response
+# alternatively you can use the callback to update some shared state if you
+# want to be sure you've waited long enough
+time.sleep(1.0)
 
 # disconnect from the server
 sio.disconnect()
+
+# XXX: SocketIO will eventually shut down background threads and quit but it
+# takes a really long time. at this point we're fairly certain we don't need
+# to wait for a response from the Stream API so just force quit the program
+os._exit(0)
