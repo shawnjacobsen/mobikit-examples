@@ -32,7 +32,7 @@ def route_index():
     """
     Serve home page
     """
-    return app.send_static_file("index.html")
+    return app.send_static_file("templates/index.html")
 
 
 @app.route("/driver")
@@ -40,7 +40,7 @@ def driver():
     """
     Serve driver app
     """
-    return app.send_static_file("driver.html")
+    return app.send_static_file("templates/driver.html")
 
 
 @app.route("/rider")
@@ -48,7 +48,7 @@ def rider():
     """
     Serve rider app
     """
-    return app.send_static_file("rider.html")
+    return app.send_static_file("templates/rider.html")
 
 
 @app.route("/rider/<int:rider_id>/request_ride")
