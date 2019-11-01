@@ -1,6 +1,6 @@
 # Ridesharing Example
 
-This folder contains an end-to-end example ridesharing application built using Mobikit.
+This folder contains an end-to-end example ridesharing application built using Mobikit. Note that this example uses some Javascript uses some features that are only available in modern browsers (Chrome, Firefox, Edge, etc.)
 
 ## Requirements
 

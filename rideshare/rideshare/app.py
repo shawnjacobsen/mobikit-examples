@@ -11,6 +11,7 @@ import mobikit
 
 from rideshare import utils
 
+print("PATH:", Path(__file__).parent.joinpath("templates"))
 
 # Setup the Mobikit API client
 MOBIKIT_API_TOKEN = os.getenv("MOBIKIT_API_TOKEN")
@@ -32,7 +33,7 @@ def route_index():
     """
     Serve home page
     """
-    return app.send_static_file("templates/index.html")
+    return app.send_static_file("index.html")
 
 
 @app.route("/driver")
@@ -40,7 +41,7 @@ def driver():
     """
     Serve driver app
     """
-    return app.send_static_file("templates/driver.html")
+    return app.send_static_file("driver.html")
 
 
 @app.route("/rider")
@@ -48,7 +49,7 @@ def rider():
     """
     Serve rider app
     """
-    return app.send_static_file("templates/rider.html")
+    return app.send_static_file("rider.html")
 
 
 @app.route("/rider/<int:rider_id>/request_ride")
