@@ -9,7 +9,7 @@ from flask import Flask
 from flask_cors import CORS
 import mobikit
 
-from rideshare import utils
+from ridehailing import utils
 
 print("PATH:", Path(__file__).parent.joinpath("templates"))
 

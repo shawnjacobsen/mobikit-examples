@@ -12,7 +12,7 @@ Start by cloning this repo and navigating into this example's directory:
 
 ```bash
 git clone https://github.com/mobikitinc/mobikit-examples.git
-cd mobikit-examples/rideshare
+cd mobikit-examples/ridehailing
 ```
 
 To setup the application, you'll need to create 2 realtime feeds within Mobikit, one for drivers and one for riders. Then, fill in the variables in the following files:
@@ -48,13 +48,12 @@ Set environment variables for the Mobikit Stream API URL and your Mobikit API to
 export MOBIKIT_API_TOKEN='<my_api_token>'
 export MOBIKIT_WORKSPACE_ID='<my_workspace_id>'
 export PUBLIC_ADDRESS=`<public_endpoint>` # eg https://example.com
-
 ```
 
 Now you can run the application:
 
 ```bash
-start-rideshare
+start-ridehailing
 ```
 
 The web security model requires a secure context to provide [Geolocation](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API), so any site must be hosted with https. In general, if the device doesn't prompt you for location access the first time you open the site, it isn't working.
@@ -64,3 +63,13 @@ You can use [ngrok](https://ngrok.com/) to forward your local application to the
 ```bash
 ngrok http 8000
 ```
+
+## Usage
+
+Once you navigate to the website you are prompted to be either a rider or a driver.
+In this app a driver is matched to any rider within 6400 meters / 4 miles.
+This part is handled through a Mobikit Query against the database.
+
+Once they are both within 20 meters of each other the ride starts.
+This part is handled through a Mobikit Automation and a webhook.
+If you are testing on two phones it is very likely that the two users will be this close to each other, so you should expect it to quickly start the ride.
