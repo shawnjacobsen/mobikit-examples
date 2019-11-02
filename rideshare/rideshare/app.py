@@ -144,8 +144,32 @@ def driver_get_request(driver_id):
     if chosen_rider is not None:
         rider, request = chosen_rider
         request["accepted"] = True
+        request["started"] = False
         request["driver_id"] = driver_id
         request["driver_start_location"] = coords
+
+        # Create automation
+        endpoint = "{}/webhook/ride_completed/{}/".format(os.getenv("PUBLIC_ADDRESS"), request["ride_id"])
+        title = "auto-ride-{}".format(request["ride_id"])
+        rider_start_location = request["rider_start_location"]
+        feed = utils.get_feed_id(MOBIKIT_WORKSPACE_ID, 'drivers')
+        triggers = [
+            {
+                "parent_template":6,
+                "values": {
+                    "side":"inside",
+                    "center": {"type":"Point","coordinates":[rider_start_location[0], rider_start_location[1]]},"radius":1200
+                    }
+                }
+            ]
+        actions = [
+                {"parent_template":4,
+                "values":{"endpoint":endpoint}
+                }
+            ]
+        request['automation_id'] = mobikit.automations.create(MOBIKIT_WORKSPACE_ID, title, feed, triggers, actions)
+
+        # Update local references
         active_rides[request["ride_id"]] = request
         binding_driver[driver_id] = request["ride_id"]
         binding_rider[request["rider_id"]] = request["ride_id"]
@@ -154,6 +178,13 @@ def driver_get_request(driver_id):
 
     return {"ride": ride}
 
+@app.route("/webhook/ride_completed/<string:ride_id>/", methods = ['GET', 'POST'])
+def ride_completed(ride_id):
+    if ride_id not in active_rides:
+        return {}
+    active_rides[ride_id]["started"] = True
+    mobikit.automations.delete(MOBIKIT_WORKSPACE_ID, active_rides[ride_id]["automation_id"])
+    return {}
 
 # Run the flask app
 def main():

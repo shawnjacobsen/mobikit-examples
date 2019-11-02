@@ -47,6 +47,8 @@ Set environment variables for the Mobikit Stream API URL and your Mobikit API to
 ```bash
 export MOBIKIT_API_TOKEN='<my_api_token>'
 export MOBIKIT_WORKSPACE_ID='<my_workspace_id>'
+export PUBLIC_ADDRESS=`<public_endpoint>` # eg https://example.com
+
 ```
 
 Now you can run the application:
