@@ -1,5 +1,6 @@
 import datetime
 import secrets
+import mobikit
 
 
 def window_start_timestamp():
@@ -68,3 +69,14 @@ def ride_id():
     Generate a ride id
     """
     return secrets.token_hex(15)
+
+def get_feed_id(workspace_id, feed_name):
+    workspaces = mobikit.workspaces.search('')
+    workspaces = list(filter(lambda w: w["workspace_id"] == workspace_id, workspaces))
+    if len(workspaces) < 1:
+        return None
+    feeds = workspaces[0]['feeds']
+    for feed_id, name in feeds.items():
+        if name == feed_name:
+            return feed_id
+    return None

@@ -20,26 +20,22 @@
       integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
       crossorigin="anonymous"
     ></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mobikit/core@0.2.1/dist/mobikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mobikit/core@latest/dist/mobikit.min.js"></script>
   </head>
   <body>
     <section class="section">
       <div id="conn_notification" class="notification">Connecting...</div>
       <div class="container">
-        <h1 id="driverId_label" class="title"></h1>
+        <h1 id="riderId_label" class="title"></h1>
         <br /><br />
-        <div id="searching_bar">
-          <h2 class="subtitle">Searching...</h2>
-          <progress class="progress is-large is-info" max="100">100%</progress>
-        </div>
+        <button id="req_ride_btn" class="button is-link">Request a Ride</button>
       </div>
 
       <div class="container">
         <article id="ride_status" class="message is-dark">
-          <div class="message-header">
-            <p>Ride Found</p>
+          <div id="ride_status_header" class="message-header">
+            <p>Searching for ride...</p>
           </div>
-          <div id="ride_status_body" class="message-body"></div>
         </article>
       </div>
     </section>
@@ -49,25 +45,26 @@
       // NOTE: this script uses some features that are only available in modern browsers (Chrome, Firefox, Edge, etc.)
       (async function() {
         // TODO: set these values!
-        const DRIVER_FEED_ID = "<DRIVER_FEED_ID>";
+        const RIDER_FEED_ID = "<RIDER_FEED_ID>";
         const MOBIKIT_API_TOKEN = "<MOBIKIT_API_TOKEN>";
-        const driverId = Math.floor(Math.random() * 1000) + 10000;
+        const riderId = Math.floor(Math.random() * 100);
 
         // Initialize the Mobikit API client
         const mobikitAPI = new mobikit.MobikitAPI({ env: "hackathon" });
         await mobikitAPI.initialize({ token: MOBIKIT_API_TOKEN });
+        $("#ride_status").hide();
 
         // Initialize the Mobikit Stream client
         const stream = new mobikit.MobikitStream(
           mobikitAPI.auth,
-          DRIVER_FEED_ID
+          RIDER_FEED_ID
         );
         stream.tags = {
-          driver_id: driverId
+          rider_id: riderId
         };
         stream.on_connect = function() {
           $("#conn_notification")
-            .html("Connected")
+            .html("Connected to Mobikit")
             .removeClass("is-danger")
             .addClass("is-success");
         };
@@ -79,43 +76,45 @@
         };
 
         // Do some UI setup
-        $("#ride_status").hide();
-        $("#driverId_label").html(`Hello driver ${driverId}!`);
+        $("#riderId_label").html(`Hello rider ${riderId}!`);
+        $("#req_ride_btn").click(function() {
+          $("#req_ride_btn").addClass("is-loading");
+          $.ajax({
+            url: `/rider/${riderId}/request_ride`,
+            success: function() {
+              $("#req_ride_btn").hide();
+              $("#ride_status").show();
+              pollStatus();
+            }
+          });
+        });
 
         // poll the drivers status
         function pollStatus() {
           $.ajax({
-            url: `/driver/${driverId}/status`,
+            url: `/rider/${riderId}/status`,
             success: poll_response => {
-              if (poll_response.ride.accepted) {
-                let coords = poll_response.ride.rider_start_location;
-                $("#ride_status_body").html(
-                  `<p>Get to (${coords[0]}, ${coords[1]})</p>`
+              if (poll_response.ride.started) {
+                console.log('Here');
+                $("#ride_status")
+                  .removeClass("is-primary")
+                  .addClass("is-success");
+                $("#ride_status_header").html(
+                  `<p>Ride Hailed!</p>`
+                );
+              }
+              else if (poll_response.ride.accepted) {
+                $("#ride_status")
+                  .removeClass("is-dark")
+                  .addClass("is-primary");
+                $("#ride_status_header").html(
+                  `<p>Ride Accepted (${poll_response.ride.ride_id})</p>`
                 );
               }
             },
             complete: () => setTimeout(pollStatus, 2000)
           });
         }
-
-        // attempt to get a ride for the driver
-        (function attemptGetRide() {
-          $.ajax({
-            url: `/driver/${driverId}/accept_ride`,
-            success: poll_response => {
-              if (poll_response.ride !== null) {
-                $("#searching_bar").hide();
-                $("#ride_status").show();
-                pollStatus();
-              } else {
-                attemptGetRide();
-              }
-            },
-            error: error => {
-              attemptGetRide();
-            }
-          });
-        })();
 
         // start collection data
         stream.startCollecting();
